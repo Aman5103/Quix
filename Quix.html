@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NDA PW-Style Quiz App - 100 Questions</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff8dc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fffacd;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+    .question-count {
+      text-align: right;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .question {
+      font-weight: bold;
+      margin: 20px 0 10px;
+    }
+    .option {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .option:hover {
+      background: #f9f9a3;
+    }
+    .option.selected {
+      background-color: #ffe066;
+      border-color: #e0b800;
+    }
+    .option.correct {
+      background-color: #c8e6c9;
+      border-color: #2e7d32;
+    }
+    .option.incorrect {
+      background-color: #ffcdd2;
+      border-color: #c62828;
+    }
+    #nextBtn, #submitBtn, #restartBtn {
+      background-color: #ffcc00;
+      color: #000;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100%;
+    }
+    #resultScreen {
+      display: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="quizContainer">
+    <div class="question-count" id="questionCount"></div>
+    <div class="question" id="questionText"></div>
+    <div id="optionsContainer"></div>
+    <button id="nextBtn" onclick="nextQuestion()">Next</button>
+    <button id="submitBtn" onclick="showResult()" style="display:none">Submit</button>
+  </div>
+  <div class="container" id="resultScreen">
+    <h2>Your Score:</h2>
+    <p id="scoreText"></p>
+    <button id="restartBtn" onclick="restartQuiz()">Restart Quiz</button>
+  </div>
+
+  <script>
+    const quizData = [
+      { question: "Who was the first President of India?", options: ["B. R. Ambedkar", "Dr. Rajendra Prasad", "Jawaharlal Nehru", "Zakir Hussain"], answer: 1 },
+      { question: "Who was the first Indian to win a Nobel Prize?", options: ["C. V. Raman", "Mother Teresa", "Amartya Sen", "Rabindranath Tagore"], answer: 3 },
+      { question: "Who was the first Indian woman Prime Minister?", options: ["Sarojini Naidu", "Indira Gandhi", "Pratibha Patil", "Vijayalakshmi Pandit"], answer: 1 },
+      { question: "Who was the first Indian in space?", options: ["Sunita Williams", "Kalpana Chawla", "Rakesh Sharma", "Vikram Sarabhai"], answer: 2 },
+      { question: "Who was the first Indian to win an Olympic medal?", options: ["Abhinav Bindra", "Norman Pritchard", "Sushil Kumar", "Leander Paes"], answer: 1 },
+      { question: "Who was the first Indian to be elected to British Parliament?", options: ["M. K. Gandhi", "Dadabhai Naoroji", "Jawaharlal Nehru", "Bipin Chandra Pal"], answer: 1 },
+      { question: "Who was the first woman Governor of an Indian state?", options: ["Sarojini Naidu", "Indira Gandhi", "Sushma Swaraj", "Annie Besant"], answer: 0 },
+      { question: "Who was the first Indian to receive Bharat Ratna?", options: ["C. Rajagopalachari", "Dr. S. Radhakrishnan", "C. V. Raman", "Jawaharlal Nehru"], answer: 0 },
+      { question: "Who was the first Indian woman to receive the Bharat Ratna?", options: ["Mother Teresa", "Indira Gandhi", "Sarojini Naidu", "Kiran Bedi"], answer: 1 },
+      { question: "Who was the first Indian cricketer to score a triple century in Tests?", options: ["Sachin Tendulkar", "Virender Sehwag", "Sunil Gavaskar", "Rahul Dravid"], answer: 1 },
+      { question: "Which city is known as the Pink City?", options: ["Jodhpur", "Udaipur", "Jaipur", "Bikaner"], answer: 2 },
+      { question: "Which city is known as the City of Lakes?", options: ["Bhopal", "Udaipur", "Nainital", "Srinagar"], answer: 1 },
+      { question: "Which city is known as the City of Joy?", options: ["Mumbai", "Delhi", "Kolkata", "Chennai"], answer: 2 },
+      { question: "Which city is known as the Diamond City of India?", options: ["Mumbai", "Surat", "Hyderabad", "Jaipur"], answer: 1 },
+      { question: "Which city is known as the Steel City of India?", options: ["Jamshedpur", "Rourkela", "Bhilai", "Durgapur"], answer: 0 },
+      { question: "Which city is called the City of Destiny?", options: ["Bengaluru", "Vishakhapatnam", "Kochi", "Chennai"], answer: 1 },
+      { question: "Which city is called the City of Nawabs?", options: ["Lucknow", "Hyderabad", "Bhopal", "Agra"], answer: 0 },
+      { question: "Which city is called the City of Festivals?", options: ["Madurai", "Varanasi", "Ahmedabad", "Mysuru"], answer: 3 },
+      { question: "Which city is called the City of Temples?", options: ["Madurai", "Bhubaneshwar", "Kanchipuram", "All of these"], answer: 3 },
+      { question: "Which city is called the Space City?", options: ["Hyderabad", "Thiruvananthapuram", "Bengaluru", "Sriharikota"], answer: 2 },
+      { question: "Where is the Southern Command of Indian Army located?", options: ["Pune", "Jaipur", "Kochi", "Chennai"], answer: 0 },
+      { question: "Where is the Eastern Command of Indian Army located?", options: ["Shillong", "Kolkata", "Imphal", "Guwahati"], answer: 1 },
+      { question: "Where is the Northern Command of Indian Army located?", options: ["Srinagar", "Leh", "Udhampur", "Amritsar"], answer: 2 },
+      { question: "Where is the Western Command of Indian Army located?", options: ["Chandimandir", "Chandigarh", "Jammu", "Jalandhar"], answer: 0 },
+      { question: "Where is the Central Command of Indian Army located?", options: ["Lucknow", "Bhopal", "Jabalpur", "Nagpur"], answer: 0 },
+      { question: "Which Indian missile is a surface-to-air missile?", options: ["Astra", "Nag", "Akash", "Agni"], answer: 2 },
+      { question: "Which Indian missile is a surface-to-surface ballistic missile?", options: ["Akash", "Nag", "Agni", "Trishul"], answer: 2 },
+      { question: "Which missile is an air-to-air missile?", options: ["Agni", "Astra", "Akash", "BrahMos"], answer: 1 },
+      { question: "Which missile is an anti-tank missile?", options: ["Nag", "Agni", "BrahMos", "Astra"], answer: 0 },
+      { question: "Which is the joint naval exercise between India and the USA?", options: ["Malabar", "Varuna", "Indra", "Garuda"], answer: 0 },
+      { question: "Which is the joint air exercise between India and France?", options: ["Garuda", "Shakti", "Indra", "Malabar"], answer: 0 },
+      { question: "Which is the joint military exercise between India and Russia?", options: ["Yudh Abhyas", "Shakti", "Indra", "Garuda"], answer: 2 },
+      { question: "Which is the joint army exercise between India and USA?", options: ["Yudh Abhyas", "Indra", "Shakti", "Malabar"], answer: 0 },
+      { question: "Which is the joint exercise between India and France?", options: ["Shakti", "Garuda", "Surya Kiran", "Indra"], answer: 0 },
+      { question: "Which is the joint exercise between India and Nepal?", options: ["Shakti", "Yudh Abhyas", "Surya Kiran", "Malabar"], answer: 2 },
+      { question: "What is the rank of the Chief of Indian Army?", options: ["Field Marshal", "General", "Major General", "Lieutenant General"], answer: 1 },
+      { question: "What is the rank of the Chief of Indian Navy?", options: ["Admiral", "Vice Admiral", "Commodore", "Captain"], answer: 0 },
+      { question: "What is the rank of the Chief of Indian Air Force?", options: ["Air Commodore", "Air Marshal", "Air Vice Marshal", "Air Chief Marshal"], answer: 3 },
+      { question: "Which is the highest wartime gallantry award in India?", options: ["Param Vir Chakra", "Ashok Chakra", "Shaurya Chakra", "Vir Chakra"], answer: 0 },
+      { question: "Which is the highest peacetime gallantry award in India?", options: ["Param Vir Chakra", "Ashok Chakra", "Shaurya Chakra", "Vir Chakra"], answer: 1 },
+      { question: "Which missile is jointly developed by India and Russia?", options: ["Agni", "Prithvi", "BrahMos", "Astra"], answer: 2 },
+      { question: "Which is the training institute for Indian Army officers?", options: ["AFA", "IMA", "INA", "OTA"], answer: 1 },
+      { question: "Where is the National Defence Academy located?", options: ["Hyderabad", "New Delhi", "Pune", "Dehradun"], answer: 2 },
+      { question: "Which is the official tri-service academy of India?", options: ["IMA", "NDA", "AFA", "CDS"], answer: 1 },
+      { question: "Which aircraft is used by the Indian Air Force for air superiority?", options: ["Rafale", "C-130J", "Tejas", "Mirage 2000"], answer: 0 },
+      { question: "INS Vikrant is what type of ship?", options: ["Submarine", "Frigate", "Destroyer", "Aircraft Carrier"], answer: 3 },
+      { question: "What does DRDO stand for?", options: ["Defence Research and Development Organization", "Development of Rockets and Defence Operations", "Department of Research and Defence Organization", "Directorate of Rocket Development Organization"], answer: 0 },
+      { question: "What does BSF stand for?", options: ["Border Safety Force", "Border Security Force", "Battle Security Force", "Bureau of Security Force"], answer: 1 },
+      { question: "Which force guards the coastal borders of India?", options: ["CRPF", "BSF", "Indian Navy", "Indian Coast Guard"], answer: 3 },
+      { question: "Where is the Indian Naval Academy located?", options: ["Ezhimala", "Goa", "Kochi", "Vishakhapatnam"], answer: 0 }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let selectedOption = null;
+
+    const questionText = document.getElementById("questionText");
+    const optionsContainer = document.getElementById("optionsContainer");
+    const questionCount = document.getElementById("questionCount");
+
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      questionText.textContent = q.question;
+      questionCount.textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+      optionsContainer.innerHTML = "";
+      selectedOption = null;
+      q.options.forEach((option, index) => {
+        const div = document.createElement("div");
+        div.classList.add("option");
+        div.textContent = option;
+        div.onclick = () => handleAnswer(div, index);
+        optionsContainer.appendChild(div);
+      });
+    }
+
+    function handleAnswer(selectedDiv, index) {
+      if (selectedOption !== null) return;
+      selectedOption = index;
+      const correctIndex = quizData[currentQuestion].answer;
+      const options = document.querySelectorAll(".option");
+
+      options.forEach((el, idx) => {
+        el.classList.remove("selected");
+        if (idx === correctIndex) el.classList.add("correct");
+        else if (idx === index) el.classList.add("incorrect");
+      });
+
+      if (index === correctIndex) score++;
+
+      setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+          loadQuestion();
+          if (currentQuestion === quizData.length - 1) {
+            document.getElementById("nextBtn").style.display = "none";
+            document.getElementById("submitBtn").style.display = "block";
+          }
+        } else {
+          showResult();
+        }
+      }, 1000);
+    }
+
+    function nextQuestion() {}
+
+    function showResult() {
+      document.getElementById("quizContainer").style.display = "none";
+      document.getElementById("resultScreen").style.display = "block";
+      document.getElementById("scoreText").textContent = `${score} out of ${quizData.length}`;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("quizContainer").style.display = "block";
+      document.getElementById("resultScreen").style.display = "none";
+      document.getElementById("nextBtn").style.display = "block";
+      document.getElementById("submitBtn").style.display = "none";
+      loadQuestion();
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
